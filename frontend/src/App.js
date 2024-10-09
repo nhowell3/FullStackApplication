@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import React, { useState } from 'react';
 
-export default function HomeScreen() {
+export default function App() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -16,15 +16,6 @@ export default function HomeScreen() {
   const [message, setMessage] = useState('');
   const [isLogin, setIsLogin] = useState(false);
   //setIsLogin(false);
-
-  function isStrValid(str: string){
-    if (str){
-      if (str != ''){
-        return true;
-      }
-    }
-    return false;
-  }
 
   const handlePress = async () => {
     if (isLogin) {
@@ -40,7 +31,7 @@ export default function HomeScreen() {
       }
       setMessage('Registration successful');
     }
-    const url = isLogin ? 'http://10.200.116.183:5000/login' : 'http://10.200.116.183:5000/register';
+    const url = isLogin ? 'http://10.200.116.183:5000/login' : 'http://10.200.116.183/register';
     const body = isLogin
       ? { username: email, password }
       : { username: email, password }; // Backend only expects username and password for registration
