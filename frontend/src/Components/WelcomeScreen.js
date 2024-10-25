@@ -1,39 +1,20 @@
 // WelcomeScreen.js
 import React from 'react';
-import { SafeAreaView, Text, Button, StyleSheet } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import PersonalizedGreeting from './PersonalizedGreeting';
+import ProfileImage from './ProfileImage';
+import Nav from './Nav';
+import GenericPage from './GenericPage';
+import Gap from './Gap';
 
-
-export default function WelcomeScreen({ navigation, setIsLoggedIn }) {
-  const handleLogout = async () => {
-    await AsyncStorage.removeItem('token');
-    setIsLoggedIn(false);
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Login' }],
-    });
-  };
-
+export default function WelcomeScreen({ navigation, setIsLoggedIn, userData }) {
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.headerText}>Welcome!</Text>
-      <Button title="Logout" onPress={handleLogout} />
-    </SafeAreaView>
+    <GenericPage>
+      <PersonalizedGreeting userData={userData} greeting='Welcome'/>
+      <Gap/>
+      <ProfileImage/>
+      <Gap size={40}/>
+      <Nav navigation={navigation} setIsLoggedIn={setIsLoggedIn}/>
+    </GenericPage>
   );
 }
-
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: "center",
-        padding: 16, 
-    },
-    headerText: {
-        fontSize: 24,
-        marginBottom: 20,
-        textAlign: "center",
-    },
-});
-  

@@ -24,10 +24,33 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
+
 // Route to test server is running
 app.get('/', (req, res) => {
   res.send('Server is running.');
 });
+
+// Get user by jwt token
+app.get('/user', async (req, res) => {
+  try{
+    const token = req.header('Autherization');
+    const arrayToken = token.split('.');
+    const decoded = JSON.parse(atob(arrayToken[1]));
+    const id = decoded.id;
+
+    const user = await User.findOne({ _id: id });
+    if (!user){
+      return res.status(400).json({ message: 'No User' });
+    }
+
+    res.send(user);
+    return user;
+
+
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to find user' });
+  }
+})
 
 // Registration route
 app.post('/register', async (req, res) => {

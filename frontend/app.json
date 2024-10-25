@@ -1,0 +1,12 @@
+{
+    "expo": {
+        "plugins": [
+            [
+                "expo-asset",
+                {
+                    "assets": ["src/assets/ProfileIcon.png"]
+                }
+            ]
+        ]
+    }
+}

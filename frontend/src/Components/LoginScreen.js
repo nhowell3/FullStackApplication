@@ -1,22 +1,34 @@
-import {
-  Text,
-  SafeAreaView,
-  StyleSheet,
-  TextInput,
-  Button,
-  View,
-} from 'react-native';
 import React, { useState } from 'react';
+import { Text } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import GlobalStyling from '../styles/GlobalStyling';
+import ButtonStyled from './ButtonStyled';
+import BACKEND_URL from '../environment';
+import TextFieldStyled from './TextFieldStyled';
+import GenericPage from './GenericPage';
+import Gap from './Gap';
 
-export default function LoginScreen({ navigation, setIsLoggedIn }) {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+export default function LoginScreen({ navigation, setIsLoggedIn, setUserData }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [isLogin, setIsLogin] = useState(true); 
   const [message, setMessage] = useState('');
-  const [isLogin, setIsLogin] = useState(false);
-  //setIsLogin(false);
+
+  const fetchUserData = async () => {
+    const token = await AsyncStorage.getItem('token');
+
+    const response = await fetch(BACKEND_URL + '/user', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Autherization': token,
+        }
+    });
+    const json = await response.json();
+    setUserData(json);
+}
 
   const handlePress = async () => {
     if (isLogin) {
@@ -32,8 +44,8 @@ export default function LoginScreen({ navigation, setIsLoggedIn }) {
     }
   
     const url = isLogin
-      ? 'http://10.200.116.183:5000/login'
-      : 'http://10.200.116.183:5000/register';
+      ? BACKEND_URL + '/login'
+      : BACKEND_URL + '/register';
   
     const body = isLogin
       ? { username: email, password }
@@ -55,6 +67,7 @@ export default function LoginScreen({ navigation, setIsLoggedIn }) {
           if (result.token) {
             // Save token and update login state
             await AsyncStorage.setItem('token', result.token);
+            await fetchUserData();
             setIsLoggedIn(true);
             navigation.reset({
               index: 0,
@@ -73,76 +86,63 @@ export default function LoginScreen({ navigation, setIsLoggedIn }) {
       setMessage('Error connecting to the server.');
     }
   };
-  
-
-
-  const handleSwitch = () => {
-    setIsLogin(!isLogin);
-    setMessage('');
-  };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <GenericPage>
 
-      {!isLogin &&
-      <View>
-        <TextInput
-          style={styles.input}
-          placeholder="First Name"
-          onChangeText={text => setFirstName(text)}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Last Name"
-          onChangeText={text => setLastName(text)}
-        />
-      </View>
-      }
-      <TextInput
-          style={styles.input}
-          placeholder="Email"
-          onChangeText={text => setEmail(text)}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          onChangeText={text => setPassword(text)}
-        />
-      <View style={styles.button}>
-        <Button title={isLogin ? "Login" : "Sign up"} onPress={handlePress} />
-      </View>
-      <View style={styles.button}>
-        <Button title={isLogin ? "SWITCH TO SIGN UP" : "SWITCH TO LOGIN"} onPress={handleSwitch}/>
-      </View>
-      {message && <Text style={styles.validationText}>{message}</Text>}
-    </SafeAreaView>
+      {/* Header */}
+      <Text style={GlobalStyling.headerAccent}>{isLogin ? "Login" : "Sign Up"}</Text>
+
+      <Gap size={25}/>
+
+      {!isLogin && (
+        <>
+          {/* Signup Fields */}
+          <TextFieldStyled
+            placeholder="Enter first name"
+            value={firstName}
+            onChangeText={text => setFirstName(text)}
+          />
+          <TextFieldStyled
+            placeholder="Enter last name"
+            value={lastName}
+            onChangeText={text => setLastName(text)}
+          />
+        </>
+      )}
+
+      {/* Login Fields */}
+      <TextFieldStyled
+        placeholder="Enter email"
+        value={email}
+        onChangeText={text => setEmail(text)}
+        keyboardType="email-address"
+      />
+      <TextFieldStyled
+        placeholder="Enter password"
+        value={password}
+        onChangeText={text => setPassword(text)}
+        secureTextEntry={true}
+      />
+
+      <Gap/>
+
+      {/* Login/Signup buttons */}
+      <ButtonStyled 
+        title={isLogin ? "Login" : "Sign Up"} 
+        onPress={handlePress} 
+      />
+      <ButtonStyled 
+        title={isLogin ? "Switch to Sign Up" : "Switch to Login"} 
+        onPress={() => setIsLogin(!isLogin)} 
+      />
+
+      <Gap/>
+
+      {/* Validation Message */}
+      {message ? <Text style={GlobalStyling.text}>{message}</Text> : null}
+
+    </GenericPage>
   );
-};
+}
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    backgroundColor: '#ecf0f1',
-    padding: 8,
-  },
-  input: {
-    height: 40,
-    borderWidth: 1,
-    width: '80%',
-    margin: 'auto',
-    marginBottom: 12,
-    marginTop: 12,
-    paddingLeft: 8,
-  },
-  button: {
-    width: '50%',
-    margin: 'auto',
-    marginTop: 12,
-    marginBottom: 12,
-  },
-  validationText: {
-    textAlign: 'center',
-    fontSize: 18
-  }
-});
